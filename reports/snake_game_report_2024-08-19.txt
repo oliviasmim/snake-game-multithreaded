@@ -1,17 +1,17 @@
-Report for snake-game-mutex.py:
-  - Number of times more than 1 thread were in the critical zone: 1
-  - Winning snakes:
-      Snake 3: 1 wins
-  - Average execution time: 0.02 seconds
+Relatório para snake-game-mutex.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 1
+  - Cobras vencedoras:
+      Cobra 1: 1 vitória(s)
+  - Tempo médio de execução: 0.00 segundos
 
-Report for snake-game-semaforo.py:
-  - Number of times more than 1 thread were in the critical zone: 1
-  - Winning snakes:
-      Snake 3: 1 wins
-  - Average execution time: 0.07 seconds
+Relatório para snake-game-semaforo.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 1
+  - Cobras vencedoras:
+      Cobra 1: 1 vitória(s)
+  - Tempo médio de execução: 0.05 segundos
 
-Report for snake-game-exclusao-mutua.py:
-  - Number of times more than 1 thread were in the critical zone: 1
-  - Winning snakes:
-      Snake 4: 1 wins
-  - Average execution time: 0.02 seconds
+Relatório para snake-game-exclusao-mutua.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 1
+  - Cobras vencedoras:
+      Cobra 1: 1 vitória(s)
+  - Tempo médio de execução: 0.10 segundos
