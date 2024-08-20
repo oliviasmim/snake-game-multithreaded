@@ -91,7 +91,13 @@ O script `gerar-relatorio.py` foi criado para executar cada implementação do j
 
 ### **1. Jogo da Cobra com Semáforo**
 
-Nesta implementação, o semáforo é utilizado para controlar o acesso ao mapa do jogo, permitindo que até duas threads acessem a zona crítica simultaneamente. Isso reduz a chance de condições de corrida, permitindo uma execução mais rápida e eficiente do jogo.
+Nesta implementação, o semáforo é utilizado para controlar o acesso ao mapa do jogo, permitindo que até duas threads acessem a zona crítica simultaneamente. Isso reduz a chance de condições de corrida, permitindo uma execução mais rápida e eficiente do jogo. 
+
+A implementação do semáforo sem o uso de bibliotecas internas do Python, utilizando lógica de incremento e decremento com controle manual de acesso. Você pode encontrar o código da classe semaforo.py
+
+**Sincronização com Semáforo:**
+- O semáforo foi configurado para permitir que até duas threads acessem a zona crítica ao mesmo tempo. Isso evita condições de corrida, onde múltiplas cobras poderiam tentar escrever no mapa ao mesmo tempo, resultando em comportamento imprevisível.
+- Cada thread (cobra) tenta adquirir o semáforo antes de acessar o mapa. Se o semáforo permitir, a cobra entra na zona crítica; caso contrário, a thread deve aguardar até que o semáforo seja liberado.
 
 **Como Funciona:**
 
@@ -110,6 +116,13 @@ python3 snake-game-semaforo.py
 
 Nesta implementação, o mutex é utilizado para garantir que apenas uma thread por vez possa acessar as zonas críticas do código. Isso assegura que as operações sejam realizadas de forma segura e sequencial, prevenindo qualquer tipo de conflito entre as threads.
 
+**Sincronização com Mutex:**
+- O mutex (mutual exclusion) é usado para garantir que apenas uma thread por vez possacessar a zona crítica, que neste caso é o mapa do jogo ou a atualização do status do jogoIsso previne condições de corrida, onde múltiplas cobras poderiam tentar escrever no mapa amesmo tempo, resultando em comportamento imprevisível.
+- Três mutexes distintos são utilizados para controlar diferentes zonas críticas:
+  - `mutex_zona_critica`: Controla o acesso ao contador que monitora quantas threads estão tentando acessar a zona crítica do mapa.
+  - `mutex_escrever_status_jogo`: Controla a escrita no placar do jogo, assegurando que status de cada cobra seja atualizado de forma correta e consistente.
+  - `mutex_escrever_mapa`: Controla as operações de leitura e escrita no mapa do jogo.
+
 **Como Funciona:**
 
 - O mutex controla rigorosamente o acesso às zonas críticas, como o mapa do jogo e o placar.
@@ -125,13 +138,26 @@ python3 snake-game-mutex.py
 
 ### **3. Jogo da Cobra com Exclusão Mútua**
 
-Nesta implementação, a exclusão mútua é alcançada utilizando locks para controlar o acesso às zonas críticas. Isso garante que apenas uma thread por vez possa realizar operações críticas, evitando condições de corrida e garantindo a consistência dos dados.
+A exclusão mútua é implementada utilizando locks (travas) para garantir que apenas uma thread por vez possa acessar as zonas críticas, como o mapa do jogo ou o placar do status das cobras. Isso previne condições de corrida, onde múltiplas cobras poderiam tentar acessar ou modificar os mesmos recursos ao mesmo tempo, resultando em comportamento imprevisível.
 
 **Como Funciona:**
 
 - Locks são utilizados para implementar a exclusão mútua, assegurando que apenas uma thread acesse as zonas críticas por vez.
 - A exclusão mútua é aplicada tanto no mapa do jogo quanto no placar, garantindo operações seguras.
 - A contagem de acessos é usada para garantir que o comportamento esperado esteja sendo respeitado.
+
+**Locks Utilizados:**
+- `mapa_lock`: Controla o acesso ao mapa do jogo, assegurando que apenas uma thread po
+ler ou escrever no mapa de cada vez.
+- `status_jogo_lock`: Garante que apenas uma thread por vez possa atualizar o placar
+jogo, mantendo a integridade das informações de status das cobras.
+- `counter_lock`: Controla o acesso ao contador de threads tentando entrar na zona críti
+garantindo que esse contador seja atualizado corretamente.
+
+**Características Principais:**
+- **Exclusão Mútua com Locks:** Utilização de locks para implementar exclusão mútuaassegurando que apenas uma thread acesse as zonas críticas por vez.
+- **Contador de Acessos:** O código monitora o número de threads tentando acessar a zoncrítica do mapa, garantindo que o comportamento esperado da exclusão mútua esteja em vigor.
+- **Segurança e Consistência:** A implementação de exclusão mútua garante que todas aoperações críticas no jogo sejam realizadas de maneira segura e consistente, prevenindconflitos entre as threads.
 
 **Como Executar:**
 
