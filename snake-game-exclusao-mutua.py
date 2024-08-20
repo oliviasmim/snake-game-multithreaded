@@ -3,9 +3,12 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-# Define o mapa compartilhado
-tamanho_mapa = 10
+random.seed(5)
+
+# Define o mapa 
+tamanho_mapa = 7
 mapa_jogo = [[' ' for _ in range(tamanho_mapa)] for _ in range(tamanho_mapa)]
+
 jogo_terminou = False
 comida_posicoes = []
 posicoes_validas = [' ', 'F']
@@ -25,7 +28,7 @@ def escrever_mapa_zona_critica():
     global access_counter
     with counter_lock:
         access_counter += 1
-        print(f"Number of threads trying to access the shared resource: {access_counter}")
+        print(f"Quantidade de threads tentando escrever na zona crítica do mapa: {access_counter}")
 
 
 def limpar_corpo_cobra(corpo_cobra, id_cobra):
@@ -66,10 +69,10 @@ def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1
 
     for _ in range(retries):
         
-        print(f"escrever_status_jogo: Thread {cobra_id} tentando adquirir o lock...")
+        #print(f"escrever_status_jogo: Thread {cobra_id} tentando adquirir o lock...")
         if lock.acquire(timeout=0.1):
             try:
-                print(f"escrever_status_jogo: Thread {cobra_id} conseguiu adquirir o lock.")
+                #print(f"escrever_status_jogo: Thread {cobra_id} conseguiu adquirir o lock.")
                 if jogo_terminou:
                     return False
                 status_jogo[cobra_id - 1]['status'] = status
@@ -91,11 +94,11 @@ def escrever_mapa(thread_id, x, y, string, retries=5, delay=0.1):
     
     for _ in range(retries):
 
-        print(f"escrever_mapa: Thread {thread_id} tentando adquirir o lock...")
-        escrever_mapa_zona_critica()
+        #print(f"escrever_mapa: Thread {thread_id} tentando adquirir o lock...")
+         #escrever_mapa_zona_critica()
         if lock.acquire(timeout=0.1):
             try:
-                print(f"escrever_mapa: Thread {thread_id} conseguiu adquirir o lock.")
+                #print(f"escrever_mapa: Thread {thread_id} conseguiu adquirir o lock.")
                 if jogo_terminou:
                     return False
                 if mapa_jogo[x][y] in posicoes_validas or mapa_jogo[x][y] == str(thread_id):
@@ -122,6 +125,8 @@ def gerar_comida():
             if jogo_terminou:
                 break
             while len(comida_posicoes) < 2:
+                if jogo_terminou:
+                    break
                 # Gera uma posição aleatória para x e y
                 x, y = random.randint(0, tamanho_mapa-1), random.randint(0, tamanho_mapa-1)
                 # Verifica se a posição gerada está vazia
@@ -230,8 +235,10 @@ def mover_cobra(id_cobra):
 
 def main():
     global jogo_terminou
+    global cobra_vencedora
     jogo_terminou = False
 
+    start_time = time.time()
     with ThreadPoolExecutor(max_workers=5) as executor:
         executor.submit(mover_cobra, 1)
         executor.submit(mover_cobra, 2)
@@ -240,6 +247,10 @@ def main():
         executor.submit(gerar_comida)
 
     # Mostrar o vetor "mapa" após a execução das threads
+    end_time = time.time()  # Record the end time
+    elapsed_time = end_time - start_time  # Calculate the elapsed time
+    print(f"Tempo de execução: {elapsed_time:.2f} segundos.")
+    print("Cobra vencedora: ", cobra_vencedora)
     print("Vetor 'mapa' após execução das threads:")
     for linha in mapa_jogo:
         print(' '.join(linha))
