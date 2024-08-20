@@ -54,14 +54,15 @@ status_jogo =  [{'id': 1, 'status': 'viva', 'pontos': 0},
 cobra_vencedora = None
 access_counter = 0
 
-semaforo = Semaforo(2)
-mutex = Semaforo(1)
+mutex_zona_critica = Semaforo(1)
+mutex_escrever_status_jogo = Semaforo(1)
+mutex_escrever_mapa = Semaforo(1)
 
 def escrever_mapa_zona_critica():
     global access_counter
-    if mutex.acquire():
+    if mutex_zona_critica.acquire():
         access_counter += 1
-        mutex.release()
+        mutex_zona_critica.release()
     print(f"Quantidade de threads tentando escrever na zona crítica do mapa: {access_counter}")
 
 def limpar_corpo_cobra(corpo_cobra, id_cobra):
@@ -98,7 +99,7 @@ def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1
 
     for _ in range(retries):
         
-        if semaforo.acquire():
+        if mutex_escrever_status_jogo.acquire():
             try:
                 if jogo_terminou:
                     return False
@@ -107,7 +108,7 @@ def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1
                 verificar_status_jogo()
                 return True
             finally:
-                semaforo.release()
+                mutex_escrever_status_jogo.release()
         else:
             time.sleep(delay)
     
@@ -121,7 +122,7 @@ def escrever_mapa(thread_id, x, y, string, retries=5, delay=0.1):
     for _ in range(retries):
 
         escrever_mapa_zona_critica()
-        if semaforo.acquire():
+        if mutex_escrever_mapa.acquire():
             try:
                 if jogo_terminou:
                     return False
@@ -129,11 +130,11 @@ def escrever_mapa(thread_id, x, y, string, retries=5, delay=0.1):
                     mapa_jogo[x][y] = string
                     return True
             finally:
-                semaforo.release()
-                if mutex.acquire():
+                mutex_escrever_mapa.release()
+                if mutex_zona_critica.acquire():
                     global access_counter
                     access_counter -= 1
-                    mutex.release()
+                    mutex_zona_critica.release()
         else:
             print("retry")
             time.sleep(delay)
@@ -217,13 +218,13 @@ def mover_cobra(id_cobra):
             escrever_status_jogo(id_cobra, 'morta', 0)
 
             print(f"Cobra {id_cobra} colidiu com a cobra {mapa_jogo[nova_posicao[0]][nova_posicao[1]]} e morreu!")
-            if semaforo.acquire():
+            if mutex_escrever_mapa.acquire():
                 try:
                     for segment in corpo_cobra:
                         x, y = segment
                         mapa_jogo[x][y] = ' '
                 finally:
-                    semaforo.release()
+                    mutex_escrever_mapa.release()
             break
 
         # Atualiza o corpo da cobra
