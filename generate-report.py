@@ -1,9 +1,9 @@
 import subprocess
 import re
-
+from datetime import datetime
 # Configuration
 scripts = ['snake-game-mutex.py', 'snake-game-semaforo.py', 'snake-game-exclusao-mutua.py']
-runs_per_script = 10
+runs_per_script = 1
 
 # Regex patterns to capture relevant data
 threads_pattern = re.compile(r'Quantidade de threads tentando escrever na zona crítica do mapa: (\d+)')
@@ -65,6 +65,9 @@ for script, data in results.items():
 report_content = "\n".join(report)
 print(report_content)
 
+current_date = datetime.now().strftime("%Y-%m-%d")
+filename = f"./reports/snake_game_report_{current_date}.txt"
+
 # Optionally, save the report to a file
-with open("snake_game_report.txt", "w") as report_file:
+with open(filename, "w") as report_file:
     report_file.write(report_content)

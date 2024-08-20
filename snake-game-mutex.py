@@ -1,40 +1,7 @@
 import random
 import time
 from concurrent.futures import ThreadPoolExecutor
-
-class Semaforo:
-    def __init__(self, quantidadeThreads):
-        self.quantidade = quantidadeThreads  
-        self.quantidade_lock = 0    # Lock 
-
-    def increment(self):
-        while True:
-            if self.quantidade_lock == 0:
-                self.quantidade_lock = 1  
-                self.quantidade += 1
-                self.quantidade_lock = 0  
-                break
-
-    def decrement(self):
-        while True:
-            if self.quantidade_lock == 0:
-                self.quantidade_lock = 1  
-                if self.quantidade > 0:
-                    self.quantidade -= 1
-                    self.quantidade_lock = 0 
-                    return True  # Returna True if acquire
-                self.quantidade_lock = 0  
-
-    def acquire(self):
-        while True:
-            if self.decrement():
-                return True
-            else:
-                time.sleep(0.01) 
-
-    def release(self):
-        self.increment()
-
+from semaforo import Semaforo
 
 random.seed(5)
 # Mapa
@@ -64,17 +31,6 @@ def escrever_mapa_zona_critica():
         access_counter += 1
         mutex_zona_critica.release()
     print(f"Quantidade de threads tentando escrever na zona crítica do mapa: {access_counter}")
-
-def limpar_corpo_cobra(corpo_cobra, id_cobra):
-    for segment in corpo_cobra:
-        x, y = segment
-        for _ in range(5):  # Retry logica 
-            if escrever_mapa(str(id_cobra), x, y, ' '):
-                break
-            time.sleep(0.1)
-        else:
-            print(f"Falha ao limpar parte do corpo da cobra {id_cobra} na posição ({x}, {y}).")
-
 
 def verificar_status_jogo():
     global jogo_terminou
