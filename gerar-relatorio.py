@@ -1,10 +1,11 @@
 import subprocess
 import re
 from datetime import datetime
+from statistics import median
 
 # Configuração
 scripts = ['snake-game-mutex.py', 'snake-game-semaforo.py', 'snake-game-exclusao-mutua.py']
-vezes_por_script = 1  # Número de vezes que cada script será executado
+vezes_por_script = 20  # Número de vezes que cada script será executado
 
 # REGEX para pegar os dados do log
 padrao_threads = re.compile(r'Quantidade de threads tentando escrever na zona crítica do mapa: (\d+)')
@@ -12,7 +13,7 @@ padrao_vencedor = re.compile(r'Cobra vencedora:\s+(\d+)')
 padrao_tempo = re.compile(r'Tempo de execução:\s+([\d\.]+)\s+segundos')
 
 # Armazenando para os resultados
-resultados = {script: {'mais_de_2_threads': 0, 'cobras_vencedoras': {}, 'tempos_execucao': []} for script in scripts}
+resultados = {script: {'mais_de_2_threads': 0, 'cobras_vencedoras': {}, 'tempos_execucao': [], 'race_conditions': []} for script in scripts}
 
 # Executa cada script pela quantidade de vezes que for setado em vezes_por_script
 for script in scripts:
@@ -24,8 +25,9 @@ for script in scripts:
         
         # Conta momentos onde mais de 2 threads estavam na zona crítica
         threads_na_zona_critica = [int(match) for match in padrao_threads.findall(saida)]
-        if any(t > 1 for t in threads_na_zona_critica):
-            resultados[script]['mais_de_2_threads'] += 1
+        count_mais_de_2_threads = sum(1 for t in threads_na_zona_critica if t > 1)
+        resultados[script]['mais_de_2_threads'] += count_mais_de_2_threads
+        resultados[script]['race_conditions'].append(count_mais_de_2_threads)
         
         # Pega a cobra vencedora
         vencedor_encontrado = padrao_vencedor.search(saida)
@@ -53,6 +55,11 @@ for script, dados in resultados.items():
     for cobra, contagem in dados['cobras_vencedoras'].items():
         relatorio.append(f"      Cobra {cobra}: {contagem} vitória(s)")
     
+    # Calcula a mediana das condições de corrida prevenidas
+    if dados['race_conditions']:
+        mediana_race_conditions = median(dados['race_conditions'])
+        relatorio.append(f"  - Mediana das condições de corrida prevenidas: {mediana_race_conditions}")
+       
     # Resumo dos tempos de execução
     if dados['tempos_execucao']:
         # Média dos tempos de execução
