@@ -19,8 +19,9 @@ status_jogo =  [{'id': 1, 'status': 'viva', 'pontos': 0},
                 {'id': 4, 'status': 'viva', 'pontos': 0}]
 
 cobra_vencedora = None
-lock = threading.Lock()
-# Initialize a counter and a lock
+mapa_lock = threading.Lock()
+status_jogo_lock = threading.Lock()
+
 access_counter = 0
 counter_lock = threading.Lock()
 
@@ -29,19 +30,6 @@ def escrever_mapa_zona_critica():
     with counter_lock:
         access_counter += 1
         print(f"Quantidade de threads tentando escrever na zona crítica do mapa: {access_counter}")
-
-
-def limpar_corpo_cobra(corpo_cobra, id_cobra):
-    global lock
-
-    for segment in corpo_cobra:
-        x, y = segment
-        for _ in range(5):  # Retry logica 
-            if escrever_mapa(str(id_cobra), x, y, ' '):
-                break
-            time.sleep(0.1)
-        else:
-            print(f"Falha ao limpar parte do corpo da cobra {id_cobra} na posição ({x}, {y}).")
 
 
 def verificar_status_jogo():
@@ -60,19 +48,16 @@ def verificar_status_jogo():
         print(f"A Cobra {cobra_vencedora} atingiu 3 pontos e venceu o jogo! Status do jogo: {status_jogo}")
         jogo_terminou = True
         return
-        #time.sleep(0.1)
 
 def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1):
     global jogo_terminou
     global status_jogo
-    global lock
+    global status_jogo_lock
 
     for _ in range(retries):
         
-        #print(f"escrever_status_jogo: Thread {cobra_id} tentando adquirir o lock...")
-        if lock.acquire(timeout=0.1):
+        if status_jogo_lock.acquire(timeout=0.1):
             try:
-                #print(f"escrever_status_jogo: Thread {cobra_id} conseguiu adquirir o lock.")
                 if jogo_terminou:
                     return False
                 status_jogo[cobra_id - 1]['status'] = status
@@ -80,7 +65,7 @@ def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1
                 verificar_status_jogo()
                 return True
             finally:
-                lock.release()
+                status_jogo_lock.release()
         else:
             time.sleep(delay)
     
@@ -90,22 +75,19 @@ def escrever_status_jogo(cobra_id, status="viva", pontos=0, retries=5, delay=0.1
 def escrever_mapa(thread_id, x, y, string, retries=5, delay=0.1):
     global jogo_terminou
     global mapa_jogo
-    global lock
+    global mapa_lock
     
     for _ in range(retries):
-
-        #print(f"escrever_mapa: Thread {thread_id} tentando adquirir o lock...")
-         #escrever_mapa_zona_critica()
-        if lock.acquire(timeout=0.1):
+        escrever_mapa_zona_critica()
+        if mapa_lock.acquire(timeout=0.1):
             try:
-                #print(f"escrever_mapa: Thread {thread_id} conseguiu adquirir o lock.")
                 if jogo_terminou:
                     return False
                 if mapa_jogo[x][y] in posicoes_validas or mapa_jogo[x][y] == str(thread_id):
                     mapa_jogo[x][y] = string
                     return True
             finally:
-                lock.release()
+                mapa_lock.release()
                 with counter_lock:
                     global access_counter
                     access_counter -= 1
@@ -124,10 +106,10 @@ def gerar_comida():
     while not jogo_terminou:
             if jogo_terminou:
                 break
+
             while len(comida_posicoes) < 2:
                 if jogo_terminou:
                     break
-                # Gera uma posição aleatória para x e y
                 x, y = random.randint(0, tamanho_mapa-1), random.randint(0, tamanho_mapa-1)
                 # Verifica se a posição gerada está vazia
                 if escrever_mapa('thread_comida', x, y, 'F'):
@@ -135,7 +117,6 @@ def gerar_comida():
                     print(f"Gerando comida em {x}, {y}")
                     comida_posicoes.append([x, y])
                     
-        # time.sleep(0.1)
 
 # Lógica de movimento da cobra
 def mover_cobra(id_cobra):
@@ -154,12 +135,9 @@ def mover_cobra(id_cobra):
 
     while not jogo_terminou and status_jogo[id_cobra - 1]['status'] == 'viva':
         # Gera uma direção aleatória para a cobra se mover
-        # print(f"Inicio do while: {id_cobra}") 
         direcao = random.choice(direcoes)
-        
         # Calcula a nova posição da cobra
         nova_posicao = posicao.copy()
-
         # Atualiza a nova posição com base na direção
         if direcao == 'up':
             nova_posicao[0] -= 1
@@ -174,9 +152,6 @@ def mover_cobra(id_cobra):
         nova_posicao[0] = max(0, min(nova_posicao[0], tamanho_mapa-1))
         nova_posicao[1] = max(0, min(nova_posicao[1], tamanho_mapa-1))
         # Atualiza o mapa e verifica o estado do jogo (zona crítica propensa a condições de corrida)
-        #with lock:        
-        
-        #print(f"Cobra {id_cobra} se moveu para {nova_posicao}, no mapa: {mapa_jogo[nova_posicao[0]][nova_posicao[1]]}")
         if nova_posicao in corpo_cobra:
             print(f"Cobra {id_cobra} tentou se mover para seu próprio corpo, movimento ignorado.")
 
@@ -187,50 +162,37 @@ def mover_cobra(id_cobra):
                 # A cobra come a comida
                 # Remove a comida da posição
                 comida_posicoes.remove(nova_posicao)
-                #Atualiza o placar
+                # Atualiza o placar
                 escrever_status_jogo(id_cobra, 'viva', 1)
-                
-
                 # Aumenta o tamanho da cobra
                 corpo_cobra.append(nova_posicao.copy())
-
                 escrever_mapa(str(id_cobra), nova_posicao[0], nova_posicao[1], str(id_cobra))
                 
-                   
-
         # Verifica se a nova posição está ocupada por outra cobra
         elif mapa_jogo[nova_posicao[0]][nova_posicao[1]] not in posicoes_validas:
-                #tatus_jogo[id_cobra - 1]['status'] = 'morta'
             escrever_status_jogo(id_cobra, 'morta', 0)
 
-
             print(f"Cobra {id_cobra} colidiu com a cobra {mapa_jogo[nova_posicao[0]][nova_posicao[1]]} e morreu!")
-            # print(f"Corpo da cobra {id_cobra}: {corpo_cobra}")
-            if lock.acquire(timeout=0.3):
+            if mapa_lock.acquire(timeout=0.3):
                 try:
                     for segment in corpo_cobra:
                         x, y = segment
                         mapa_jogo[x][y] = ' '
                 finally:
-                    lock.release()
+                    mapa_lock.release()
             break
 
-        
         # Atualiza o corpo da cobra
         else:
             # Atualiza o mapa com o corpo da cobra
             escrever_mapa(str(id_cobra), nova_posicao[0], nova_posicao[1], str(id_cobra))
-            
             corpo_cobra.append(nova_posicao.copy())
             # Remove a cauda da cobra
             cauda = corpo_cobra.pop(0)
             escrever_mapa(str(id_cobra), cauda[0], cauda[1], ' ')
-            
             # Atualiza a posição da cobra
         posicao = nova_posicao
-        # print(f"Fim do while: {id_cobra}") 
 
-        # time.sleep(0.1)
 
 
 def main():
@@ -246,9 +208,8 @@ def main():
         executor.submit(mover_cobra, 4)
         executor.submit(gerar_comida)
 
-    # Mostrar o vetor "mapa" após a execução das threads
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
+    end_time = time.time()  
+    elapsed_time = end_time - start_time  
     print(f"Tempo de execução: {elapsed_time:.2f} segundos.")
     print("Cobra vencedora: ", cobra_vencedora)
     print("Vetor 'mapa' após execução das threads:")

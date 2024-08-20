@@ -230,7 +230,6 @@ def mover_cobra(id_cobra):
         else:
             # Atualiza o mapa com o corpo da cobra
             escrever_mapa(str(id_cobra), nova_posicao[0], nova_posicao[1], str(id_cobra))
-            
             corpo_cobra.append(nova_posicao.copy())
             # Remove a cauda da cobra
             cauda = corpo_cobra.pop(0)
@@ -238,7 +237,6 @@ def mover_cobra(id_cobra):
             
         # Atualiza a posição da cobra
         posicao = nova_posicao
-
 
 
 def main():
