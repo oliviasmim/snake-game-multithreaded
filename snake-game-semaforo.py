@@ -19,43 +19,41 @@ status_jogo =  [{'id': 1, 'status': 'viva', 'pontos': 0},
 
 cobra_vencedora = None
 access_counter = 0
-class CustomSemaphore:
-    def __init__(self, initial):
-        self.value = initial  # Initial number of permits
-        self.value_lock = 0    # Lock variable (0 means unlocked, 1 means locked)
+class Semaforo:
+    def __init__(self, quantidadeThreads):
+        self.quantidade = quantidadeThreads  
+        self.quantidade_lock = 0    # Lock 
 
-    def atomic_increment(self):
-        # Spinlock to simulate an atomic increment
+    def increment(self):
         while True:
-            if self.value_lock == 0:
-                self.value_lock = 1  # Acquire the lock
-                self.value += 1
-                self.value_lock = 0  # Release the lock
+            if self.quantidade_lock == 0:
+                self.quantidade_lock = 1  
+                self.quantidade += 1
+                self.quantidade_lock = 0  
                 break
 
-    def atomic_decrement(self):
-        # Spinlock to simulate an atomic decrement
+    def decrement(self):
         while True:
-            if self.value_lock == 0:
-                self.value_lock = 1  # Acquire the lock
-                if self.value > 0:
-                    self.value -= 1
-                    self.value_lock = 0  # Release the lock
-                    return True  # Return True when successfully acquired
-                self.value_lock = 0  # Release the lock
+            if self.quantidade_lock == 0:
+                self.quantidade_lock = 1  
+                if self.quantidade > 0:
+                    self.quantidade -= 1
+                    self.quantidade_lock = 0 
+                    return True  # Returna True if acquire
+                self.quantidade_lock = 0  
 
     def acquire(self):
         while True:
-            if self.atomic_decrement():
+            if self.decrement():
                 return True
             else:
-                time.sleep(0.01)  # Sleep to simulate yielding the processor
+                time.sleep(0.01) 
 
     def release(self):
-        self.atomic_increment()
+        self.increment()
 
-semaforo = CustomSemaphore(2)
-mutex = CustomSemaphore(1)
+semaforo = Semaforo(2)
+mutex = Semaforo(1)
 
 def escrever_mapa_zona_critica():
     global access_counter
