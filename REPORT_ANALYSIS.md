@@ -3,15 +3,15 @@
 #### **Visão Geral do Código**
 
 1. **Implementação com Mutex (`snake-game-mutex.py`):**
-   - **Mutex (Mutual Exclusion):** Garante que apenas uma thread acesse a seção crítica (o mapa do jogo) por vez. Isso é realizado através de chamadas aos métodos `acquire()` e `release()` no objeto Mutex, que bloqueia e libera o acesso, respectivamente.
+   - **Mutex (Mutual Exclusion):** Garante que apenas uma thread acesse a seção crítica (o mapa do jogo) por vez. Neste caso, foi configurado com a classe personalizada do Semáforo para permitir até uma thread na zona crítica.
    - **Objetivo:** Reduzir as condições de corrida permitindo que apenas uma thread acesse o recurso compartilhado em qualquer momento.
 
 2. **Implementação com Semáforo (`snake-game-semaforo.py`):**
-   - **Semáforo:** Permite que um número limitado de threads acesse a seção crítica simultaneamente. Neste caso, o Semáforo foi configurado para permitir até duas threads simultâneas.
+   - **Semáforo:** Permite que um número limitado de threads acesse a seção crítica simultaneamente. Neste caso, a classe personalizada do Semáforo foi configurada para permitir até duas threads simultâneas.
    - **Objetivo:** Aumentar a eficiência permitindo algum nível de concorrência controlada, ao mesmo tempo em que previne condições de corrida.
 
 3. **Implementação com Exclusão Mútua (`snake-game-exclusao-mutua.py`):**
-   - **Exclusão Mútua:** Semelhante ao Mutex, mas implementado de maneira mais rígida para garantir que apenas uma thread possa acessar a seção crítica por vez, potencialmente usando técnicas personalizadas para reforçar o acesso exclusivo.
+   - **Exclusão Mútua:** Semelhante ao Mutex, mas implementado de maneira mais rígida para garantir que apenas uma thread possa acessar a seção crítica por vez.
    - **Objetivo:** Prevenir as condições de corrida de maneira mais agressiva, limitando ainda mais a concorrência entre threads.
 
 ---
