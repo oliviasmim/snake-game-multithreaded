@@ -1,0 +1,29 @@
+Relatório para snake-game-mutex.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 13381
+  - Cobras vencedoras:
+      Cobra 3: 13 vitória(s)
+      Cobra 1: 16 vitória(s)
+      Cobra 2: 10 vitória(s)
+      Cobra 4: 11 vitória(s)
+  - Mediana das condições de corrida prevenidas: 223.5
+  - Tempo médio de execução: 0.11 segundos
+
+Relatório para snake-game-semaforo.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 16034
+  - Cobras vencedoras:
+      Cobra 4: 19 vitória(s)
+      Cobra 3: 11 vitória(s)
+      Cobra 2: 4 vitória(s)
+      Cobra 1: 16 vitória(s)
+  - Mediana das condições de corrida prevenidas: 300.5
+  - Tempo médio de execução: 0.13 segundos
+
+Relatório para snake-game-exclusao-mutua.py:
+  - Número de vezes que mais de 1 thread estava na zona crítica: 8365
+  - Cobras vencedoras:
+      Cobra 1: 19 vitória(s)
+      Cobra 2: 14 vitória(s)
+      Cobra 4: 10 vitória(s)
+      Cobra 3: 7 vitória(s)
+  - Mediana das condições de corrida prevenidas: 72.0
+  - Tempo médio de execução: 0.14 segundos

@@ -5,7 +5,7 @@ from statistics import median
 
 # Configuração
 scripts = ['snake-game-mutex.py', 'snake-game-semaforo.py', 'snake-game-exclusao-mutua.py']
-vezes_por_script = 20  # Número de vezes que cada script será executado
+vezes_por_script = 50  # Número de vezes que cada script será executado
 
 # REGEX para pegar os dados do log
 padrao_threads = re.compile(r'Quantidade de threads tentando escrever na zona crítica do mapa: (\d+)')
@@ -75,7 +75,7 @@ conteudo_relatorio = "\n".join(relatorio)
 print(conteudo_relatorio)
 
 # Define o nome do arquivo do relatório com a data atual
-data_atual = datetime.now().strftime("%Y-%m-%d")
+data_atual = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 nome_arquivo = f"./reports/snake_game_report_{data_atual}.txt"
 
 # Cria um arquivo de relatório

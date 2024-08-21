@@ -8,6 +8,8 @@ O objetivo deste projeto é explorar e comparar diferentes mecanismos de sincron
 
 O projeto consiste em três implementações distintas do jogo da cobra, cada uma utilizando um método de sincronização diferente para gerenciar o acesso a recursos compartilhados (como o mapa do jogo e o placar). As threads representam cobras que se movem pelo mapa, comem comida e competem para sobreviver. A sincronização é essencial para evitar condições de corrida e garantir que o jogo funcione corretamente em um ambiente multithreaded.
 
+As regras do jogo e uma descrição aprofundada delas você encontra no arquivo `BUSINESS_RULES.md`
+
 ### **Referências**
 
 Este projeto foi inspirado pelos conceitos apresentados em aula, tendo como referência o livro "Sistemas Operacionais Modernos" de Andrew S. Tanenbaum, que aborda a importância da sincronização em sistemas operacionais e a necessidade de mecanismos eficazes para evitar condições de corrida em ambientes multithreaded.
@@ -15,8 +17,9 @@ Este projeto foi inspirado pelos conceitos apresentados em aula, tendo como refe
 ## **Guia de Instalação**
 
 ### **Pré-requisitos**
+
 - Python 3.x instalado na máquina.
-- Um ambiente virtual Python (recomendado).
+- Ou um ambiente virtual Python.
 
 ### **Passos de Instalação**
 
@@ -53,7 +56,7 @@ O script `gerar-relatorio.py` foi criado para executar cada implementação do j
 
 2. **Saída Esperada do Relatório:**
 
-   O script de relatório irá gerar um arquivo `relatorio_jogo_cobra_<data>.txt` dentro da pasta `relatorios/`. O conteúdo típico do relatório será algo como:
+   O script de relatório irá gerar um arquivo `snake_game_report_<data>.txt` dentro da pasta `reports/`. O conteúdo típico do relatório será algo como:
 
    ```
    Relatório para snake-game-mutex.py:
@@ -91,11 +94,12 @@ O script `gerar-relatorio.py` foi criado para executar cada implementação do j
 
 ### **1. Jogo da Cobra com Semáforo**
 
-Nesta implementação, o semáforo é utilizado para controlar o acesso ao mapa do jogo, permitindo que até duas threads acessem a zona crítica simultaneamente. Isso reduz a chance de condições de corrida, permitindo uma execução mais rápida e eficiente do jogo. 
+Nesta implementação, o semáforo é utilizado para controlar o acesso ao mapa do jogo, permitindo que até duas threads acessem a zona crítica simultaneamente. Isso reduz a chance de condições de corrida, permitindo uma execução mais rápida e eficiente do jogo.
 
 A implementação do semáforo sem o uso de bibliotecas internas do Python, utilizando lógica de incremento e decremento com controle manual de acesso. Você pode encontrar o código da classe semaforo.py
 
 **Sincronização com Semáforo:**
+
 - O semáforo foi configurado para permitir que até duas threads acessem a zona crítica ao mesmo tempo. Isso evita condições de corrida, onde múltiplas cobras poderiam tentar escrever no mapa ao mesmo tempo, resultando em comportamento imprevisível.
 - Cada thread (cobra) tenta adquirir o semáforo antes de acessar o mapa. Se o semáforo permitir, a cobra entra na zona crítica; caso contrário, a thread deve aguardar até que o semáforo seja liberado.
 
@@ -111,12 +115,12 @@ A implementação do semáforo sem o uso de bibliotecas internas do Python, util
 python3 snake-game-semaforo.py
 ```
 
-
 ### **2. Jogo da Cobra com Mutex**
 
 Nesta implementação, o mutex é utilizado para garantir que apenas uma thread por vez possa acessar as zonas críticas do código. Isso assegura que as operações sejam realizadas de forma segura e sequencial, prevenindo qualquer tipo de conflito entre as threads.
 
 **Sincronização com Mutex:**
+
 - O mutex (mutual exclusion) é usado para garantir que apenas uma thread por vez possacessar a zona crítica, que neste caso é o mapa do jogo ou a atualização do status do jogoIsso previne condições de corrida, onde múltiplas cobras poderiam tentar escrever no mapa amesmo tempo, resultando em comportamento imprevisível.
 - Três mutexes distintos são utilizados para controlar diferentes zonas críticas:
   - `mutex_zona_critica`: Controla o acesso ao contador que monitora quantas threads estão tentando acessar a zona crítica do mapa.
@@ -135,7 +139,6 @@ Nesta implementação, o mutex é utilizado para garantir que apenas uma thread 
 python3 snake-game-mutex.py
 ```
 
-
 ### **3. Jogo da Cobra com Exclusão Mútua**
 
 A exclusão mútua é implementada utilizando locks (travas) para garantir que apenas uma thread por vez possa acessar as zonas críticas, como o mapa do jogo ou o placar do status das cobras. Isso previne condições de corrida, onde múltiplas cobras poderiam tentar acessar ou modificar os mesmos recursos ao mesmo tempo, resultando em comportamento imprevisível.
@@ -147,14 +150,16 @@ A exclusão mútua é implementada utilizando locks (travas) para garantir que a
 - A contagem de acessos é usada para garantir que o comportamento esperado esteja sendo respeitado.
 
 **Locks Utilizados:**
+
 - `mapa_lock`: Controla o acesso ao mapa do jogo, assegurando que apenas uma thread po
-ler ou escrever no mapa de cada vez.
+  ler ou escrever no mapa de cada vez.
 - `status_jogo_lock`: Garante que apenas uma thread por vez possa atualizar o placar
-jogo, mantendo a integridade das informações de status das cobras.
+  jogo, mantendo a integridade das informações de status das cobras.
 - `counter_lock`: Controla o acesso ao contador de threads tentando entrar na zona críti
-garantindo que esse contador seja atualizado corretamente.
+  garantindo que esse contador seja atualizado corretamente.
 
 **Características Principais:**
+
 - **Exclusão Mútua com Locks:** Utilização de locks para implementar exclusão mútuaassegurando que apenas uma thread acesse as zonas críticas por vez.
 - **Contador de Acessos:** O código monitora o número de threads tentando acessar a zoncrítica do mapa, garantindo que o comportamento esperado da exclusão mútua esteja em vigor.
 - **Segurança e Consistência:** A implementação de exclusão mútua garante que todas aoperações críticas no jogo sejam realizadas de maneira segura e consistente, prevenindconflitos entre as threads.
